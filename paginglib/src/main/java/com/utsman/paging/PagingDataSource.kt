@@ -15,6 +15,7 @@ abstract class PagingDataSource<T>: PagingSource {
     internal var endPage = false
     internal var hasError = false
     internal var currentPage = 1
+    internal var currentThrowable: Throwable? = null
 
     override suspend fun loadState(page: Int) {
         currentPage = page
@@ -24,15 +25,17 @@ abstract class PagingDataSource<T>: PagingSource {
     abstract suspend fun onLoadState(page: Int)
 
     fun setCallbackItems(items: List<T>) = GlobalScope.launch {
+        hasError = false
+        currentThrowable = null
         mutableList.clear()
         mutableList.addAll(items)
         mutableLiveData.postValue(mutableList.toPagingData())
-        hasError = false
     }
 
     fun setCallbackError(throwable: Throwable) = GlobalScope.launch {
-        mutableLiveData.postValue(throwable.toPagingData())
         hasError = true
+        currentThrowable = throwable
+        mutableLiveData.postValue(throwable.toPagingData())
     }
 
     fun endPage() {

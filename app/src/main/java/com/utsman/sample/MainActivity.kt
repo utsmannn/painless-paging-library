@@ -23,7 +23,7 @@ class MainActivity : AppCompatActivity() {
         findViewById<RecyclerView>(R.id.recycler_view).run {
             layoutManager = LinearLayoutManager(this@MainActivity)
             adapter = sampleAdapter.apply {
-                setDelayPerPage(4000)
+                setDelayPerPage(1000)
                 bindDataSource(viewModel.sampleDataSource)
             }
         }

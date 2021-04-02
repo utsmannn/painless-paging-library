@@ -38,7 +38,10 @@ class StateViewHolder(view: View) : RecyclerView.ViewHolder(view) {
 
         findViewById<TextView>(R.id.txt_error).run {
             isVisible = loadState.loadStatus == LoadStatus.FAILED
-            //text = (loadState as LoadState.Failed).throwable.message
+
+            if (loadState.loadStatus == LoadStatus.FAILED) {
+                text = (loadState as LoadState.Failed).throwable?.message
+            }
         }
 
         findViewById<Button>(R.id.btn_retry).run {

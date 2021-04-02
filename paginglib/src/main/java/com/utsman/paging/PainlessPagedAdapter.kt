@@ -10,12 +10,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
-abstract class PainlessPagedAdapter<T, VH : RecyclerView.ViewHolder>(private var diffUtil: DiffUtil.Callback? = null) :
-    RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+abstract class PainlessPagedAdapter<T, VH : RecyclerView.ViewHolder>(
+    private var diffUtil: DiffUtil.Callback? = null
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     private val pagingData = PagingData<T>()
     private val mutableItemList: MutableList<T> = pagingData.items.toMutableList()
     private var diffResult: DiffUtil.DiffResult? = null
-    val itemList: List<T> = mutableItemList
     private var loadState: LoadState = LoadState.Idle
     private var loadStateFlow: MutableStateFlow<LoadState> = MutableStateFlow(LoadState.Idle)
     private var stateViewGroup: MutableStateFlow<ViewGroup?> = MutableStateFlow(null)
@@ -24,6 +24,12 @@ abstract class PainlessPagedAdapter<T, VH : RecyclerView.ViewHolder>(private var
     private val loadStateType = 99
     private var pagingDataSource: PagingDataSource<T>? = null
     private var delayPerPage: Long = 1000
+
+    val itemList: List<T> = mutableItemList
+    val dataSize: Int
+        get() {
+            return itemList.size
+        }
 
     fun setDelayPerPage(delay: Long) {
         delayPerPage = delay
@@ -103,7 +109,7 @@ abstract class PainlessPagedAdapter<T, VH : RecyclerView.ViewHolder>(private var
     fun addOnLoadStateListener(loadState: (itemCount: Int, loadState: LoadState) -> Unit) =
         MainScope().launch {
             loadStateFlow.collect { state ->
-                loadState.invoke(itemCount, state)
+                loadState.invoke(dataSize, state)
             }
         }
 
@@ -118,16 +124,10 @@ abstract class PainlessPagedAdapter<T, VH : RecyclerView.ViewHolder>(private var
     }
 
     override fun getItemCount(): Int {
-        return when (stateHolder) {
-            null -> mutableItemList.size
-            else -> getItemCountWithState()-1
-        }
-    }
-
-    private fun getItemCountWithState(): Int {
-        return when (stateHolder) {
-            null -> mutableItemList.size
-            else -> mutableItemList.size + if (hasExtraRow()) 1 else 0
+        return if (hasExtraRow()) {
+            mutableItemList.size + if (hasExtraRow()) 1 else 0
+        } else {
+            mutableItemList.size
         }
     }
 
@@ -161,30 +161,6 @@ abstract class PainlessPagedAdapter<T, VH : RecyclerView.ViewHolder>(private var
         }
     }
 
-    private fun copyLast(): T {
-        return mutableItemList.last()
-    }
-
-    private fun addLast() {
-        if (mutableItemList.isNotEmpty()) {
-            try {
-                mutableItemList.add(copyLast())
-                notifyItemInserted(itemCount + 1)
-            } catch (e: IndexOutOfBoundsException) {
-            }
-        }
-    }
-
-    private fun removeLast() {
-        if (mutableItemList.isNotEmpty()) {
-            try {
-                mutableItemList.removeLast()
-                notifyItemChanged(mutableItemList.lastIndex)
-            } catch (e: IndexOutOfBoundsException) {
-            }
-        }
-    }
-
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)
         val layoutManager = recyclerView.layoutManager
@@ -201,10 +177,9 @@ abstract class PainlessPagedAdapter<T, VH : RecyclerView.ViewHolder>(private var
                             submitLoadState(LoadState.End)
                         }
                         pagingDataSource?.hasError == true -> {
-                            submitLoadState(LoadState.Failed(pagingData.throwable))
+                            submitLoadState(LoadState.Failed(pagingDataSource?.currentThrowable))
                         }
                         else -> {
-                            logi("load on end ......")
                             submitLoadState(LoadState.Running)
                             MainScope().launch {
                                 pagingDataSource!!.loadState(page + 1)
