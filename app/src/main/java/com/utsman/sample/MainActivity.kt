@@ -44,7 +44,7 @@ class MainActivity : AppCompatActivity() {
             logi("state in activity --> count: $itemCount | origin: ${sampleAdapter.itemList.size} | ${state.loadStatus}")
         }
 
-        viewModel.listItem.observe(this) {
+        viewModel.pageData.observe(this) {
             sampleAdapter.submitData(it)
         }
     }

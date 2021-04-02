@@ -45,7 +45,11 @@ abstract class PagingDataSource<T>: PagingSource {
         endPage = true
     }
 
-    fun loadCurrentList(): LiveData<PagingData<T>> {
+    fun currentPageLiveData(): LiveData<PagingData<T>> {
         return mutableLiveData
+    }
+
+    fun currentPage(): PagingData<T>? {
+        return mutableLiveData.value
     }
 }

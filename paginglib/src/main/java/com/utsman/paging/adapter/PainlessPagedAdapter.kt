@@ -46,7 +46,7 @@ abstract class PainlessPagedAdapter<T, VH : RecyclerView.ViewHolder>(
         delay(delayPerPage)
         MainScope().launch {
             if (newPagingData.throwable == null) {
-                diffUtil.withNull {
+                if (diffUtil == null) {
                     diffUtil = ItemDiffUtil(mutableItemList, newPagingData.items)
                 }
 

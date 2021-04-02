@@ -7,5 +7,5 @@ import com.utsman.paging.data.PagingData
 class SampleViewModel : ViewModel() {
 
     val sampleDataSource = SampleDataSource()
-    val listItem: LiveData<PagingData<SampleItem>> = sampleDataSource.loadCurrentList()
+    val pageData: LiveData<PagingData<SampleItem>> = sampleDataSource.currentPageLiveData()
 }

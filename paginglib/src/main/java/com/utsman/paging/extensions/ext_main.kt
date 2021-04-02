@@ -6,12 +6,6 @@ import com.utsman.paging.data.PagingData
 
 internal fun logi(msg: String) = Log.i("PAGING", msg)
 
-internal fun DiffUtil.Callback?.withNull(action: () -> Unit) {
-    if (this == null) {
-        action()
-    }
-}
-
 fun <T>List<T>.toPagingData(): PagingData<T> {
     return PagingData(
         items = this
