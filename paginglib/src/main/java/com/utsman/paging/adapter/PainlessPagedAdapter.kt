@@ -8,7 +8,6 @@ import com.utsman.paging.data.LoadStatus
 import com.utsman.paging.data.PagingData
 import com.utsman.paging.datasource.PagingDataSource
 import com.utsman.paging.listener.EndlessScrollListener
-import com.utsman.paging.extensions.withNull
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
