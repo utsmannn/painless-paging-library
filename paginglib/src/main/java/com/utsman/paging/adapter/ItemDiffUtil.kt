@@ -1,7 +1,7 @@
-package com.utsman.paging
+package com.utsman.paging.adapter
 import androidx.recyclerview.widget.DiffUtil
 
-class ItemDiffUtil<T>(private val oldList: List<T>, private val newList: List<T>) : DiffUtil.Callback() {
+internal class ItemDiffUtil<T>(private val oldList: List<T>, private val newList: List<T>) : DiffUtil.Callback() {
 
     override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean = oldItemPosition == newItemPosition
 

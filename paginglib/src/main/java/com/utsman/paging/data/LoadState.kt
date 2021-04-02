@@ -1,4 +1,4 @@
-package com.utsman.paging
+package com.utsman.paging.data
 
 enum class LoadStatus {
     IDLE,

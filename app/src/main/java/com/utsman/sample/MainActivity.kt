@@ -8,8 +8,7 @@ import androidx.activity.viewModels
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.utsman.paging.LoadState
-import com.utsman.paging.PainlessPagedAdapter
+import com.utsman.paging.data.LoadState
 
 class MainActivity : AppCompatActivity() {
 

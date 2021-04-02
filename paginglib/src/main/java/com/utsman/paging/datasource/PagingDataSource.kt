@@ -1,7 +1,9 @@
-package com.utsman.paging
+package com.utsman.paging.datasource
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.utsman.paging.data.PagingData
+import com.utsman.paging.extensions.toPagingData
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 

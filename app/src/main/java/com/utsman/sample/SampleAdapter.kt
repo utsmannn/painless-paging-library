@@ -10,9 +10,9 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
-import com.utsman.paging.LoadState
-import com.utsman.paging.LoadStatus
-import com.utsman.paging.PainlessPagedAdapter
+import com.utsman.paging.data.LoadState
+import com.utsman.paging.data.LoadStatus
+import com.utsman.paging.adapter.PainlessPagedAdapter
 
 fun logi(msg: String) = Log.i("LOGGING", msg)
 

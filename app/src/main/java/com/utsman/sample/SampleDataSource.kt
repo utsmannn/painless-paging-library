@@ -1,6 +1,6 @@
 package com.utsman.sample
 
-import com.utsman.paging.PagingDataSource
+import com.utsman.paging.datasource.PagingDataSource
 
 class SampleDataSource : PagingDataSource<SampleItem>() {
 

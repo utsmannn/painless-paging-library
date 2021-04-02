@@ -1,11 +1,11 @@
-package com.utsman.paging
+package com.utsman.paging.listener
 
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 
-abstract class EndlessScrollListener : RecyclerView.OnScrollListener {
+internal abstract class EndlessScrollListener : RecyclerView.OnScrollListener {
     private var visibleThreshold = 5
     private var currentPage = 0
     private var previousTotalItemCount = 0
