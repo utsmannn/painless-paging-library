@@ -1,0 +1,3 @@
+include ':paginglib'
+include ':app'
+rootProject.name = "Painless Paging Library"
