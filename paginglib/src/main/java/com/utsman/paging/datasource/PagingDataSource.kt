@@ -27,6 +27,7 @@ abstract class PagingDataSource<T>: PagingSource {
     abstract suspend fun onLoadState(page: Int)
 
     fun setCallbackItems(items: List<T>) = GlobalScope.launch {
+        endPage = false
         hasError = false
         currentThrowable = null
         mutableList.clear()
