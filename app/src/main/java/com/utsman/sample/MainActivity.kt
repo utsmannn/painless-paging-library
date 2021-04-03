@@ -23,7 +23,6 @@ class MainActivity : AppCompatActivity() {
             layoutManager = LinearLayoutManager(this@MainActivity)
             adapter = sampleAdapter.apply {
                 setDelayPerPage(1000)
-                bindDataSource(viewModel.sampleDataSource)
             }
         }
 

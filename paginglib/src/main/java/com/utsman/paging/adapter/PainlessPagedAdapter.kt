@@ -27,7 +27,8 @@ abstract class PainlessPagedAdapter<T, VH : RecyclerView.ViewHolder>(
     private var viewGroup: ViewGroup? = null
     private var stateHolder: RecyclerView.ViewHolder? = null
     private val loadStateType = 99
-    private var pagingDataSource: PagingDataSource<T>? = null
+    //private var pagingDataSource: PagingDataSource<T>? = null
+    private val dataSourceState: MutableStateFlow<PagingDataSource<T>?> = MutableStateFlow(null)
     private var delayPerPage: Long = 1000
 
     val itemList: List<T> = mutableItemList
@@ -42,6 +43,9 @@ abstract class PainlessPagedAdapter<T, VH : RecyclerView.ViewHolder>(
 
     fun submitData(newPagingData: PagingData<T>) = GlobalScope.launch {
         submitLoadState(LoadState.Running)
+        if (dataSourceState.value == null) {
+            dataSourceState.value = newPagingData.dataSource
+        }
         delay(delayPerPage)
         MainScope().launch {
             if (newPagingData.throwable == null) {
@@ -165,20 +169,12 @@ abstract class PainlessPagedAdapter<T, VH : RecyclerView.ViewHolder>(
         MainScope().launch {
             if (hadExtraRow != hasExtraRow) {
                 if (hadExtraRow) {
-                    calculateDiff {
-                        notifyItemRemoved(itemCount)
-                    }
+                    notifyItemRemoved(itemCount - 1)
                 } else {
-                    //notifyItemInserted(itemCount)
-                    calculateDiff {
-                        notifyItemInserted(itemCount)
-                    }
+                    notifyItemInserted(itemCount)
                 }
             } else if (hasExtraRow && previousState != loadState) {
-                //notifyItemChanged(itemCount - 1)
-                calculateDiff {
-                    notifyItemChanged(itemCount - 1)
-                }
+                notifyItemChanged(itemCount - 1)
             }
         }
     }
@@ -187,29 +183,29 @@ abstract class PainlessPagedAdapter<T, VH : RecyclerView.ViewHolder>(
         super.onAttachedToRecyclerView(recyclerView)
         val layoutManager = recyclerView.layoutManager
         submitLoadState(LoadState.Running)
-        if (pagingDataSource != null && layoutManager != null) {
-            GlobalScope.launch {
-                pagingDataSource!!.loadState(1)
-            }
-
-            recyclerView.addOnScrollListener(object : EndlessScrollListener(layoutManager) {
-                override fun onLoadMore(page: Int, totalItemsCount: Int, view: RecyclerView) {
-                    when {
-                        pagingDataSource?.endPage == true -> {
-                            submitLoadState(LoadState.End)
-                        }
-                        pagingDataSource?.hasError == true -> {
-                            submitLoadState(LoadState.Failed(pagingDataSource?.currentThrowable))
-                        }
-                        else -> {
-                            submitLoadState(LoadState.Running)
-                            MainScope().launch {
-                                pagingDataSource!!.loadState(page + 1)
+        GlobalScope.launch {
+            dataSourceState.collect { pagingDataSource ->
+                if (pagingDataSource != null && layoutManager != null) {
+                    recyclerView.addOnScrollListener(object : EndlessScrollListener(layoutManager) {
+                        override fun onLoadMore(page: Int, totalItemsCount: Int, view: RecyclerView) {
+                            when {
+                                pagingDataSource.endPage -> {
+                                    submitLoadState(LoadState.End)
+                                }
+                                pagingDataSource.hasError -> {
+                                    submitLoadState(LoadState.Failed(pagingDataSource.currentThrowable))
+                                }
+                                else -> {
+                                    submitLoadState(LoadState.Running)
+                                    MainScope().launch {
+                                        pagingDataSource.loadState(page + 1)
+                                    }
+                                }
                             }
                         }
-                    }
+                    })
                 }
-            })
+            }
         }
     }
 
@@ -217,23 +213,19 @@ abstract class PainlessPagedAdapter<T, VH : RecyclerView.ViewHolder>(
         calculateDiff {
             mutableItemList.clear()
         }
-        if (pagingDataSource != null) {
+        if (dataSourceState.value != null) {
             GlobalScope.launch {
-                pagingDataSource!!.onLoadState(1)
+                dataSourceState.value!!.onLoadState(1)
             }
         }
     }
 
     fun retry() {
-        if (pagingDataSource != null) {
+        if (dataSourceState.value != null) {
             GlobalScope.launch {
                 submitLoadState(LoadState.Running)
-                pagingDataSource!!.onLoadState(pagingDataSource!!.currentPage)
+                dataSourceState.value!!.onLoadState(dataSourceState.value!!.currentPage)
             }
         }
-    }
-
-    fun bindDataSource(dataSource: PagingDataSource<T>) {
-        pagingDataSource = dataSource
     }
 }

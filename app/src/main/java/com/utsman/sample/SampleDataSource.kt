@@ -29,15 +29,16 @@ class SampleDataSource : PagingDataSource<SampleUser>() {
             logi(response.toString())
 
             val items = response.data?.map { it.toSampleUser() }
-            if (page <= pageSize) {
+            setCallbackItems(items ?: emptyList())
+            /*if (page <= pageSize) {
                 if (items != null) {
                     setCallbackItems(items)
                 } else {
                     setCallbackError(Throwable("Terjadi error"))
                 }
             } else {
-                endPage()
-            }
+                setCallbackItems(emptyList())
+            }*/
         } catch (e: Throwable) {
             setCallbackError(e)
         }
