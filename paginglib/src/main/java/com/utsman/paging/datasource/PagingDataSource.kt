@@ -7,11 +7,7 @@ import com.utsman.paging.extensions.toPagingData
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
-internal interface PagingSource {
-    suspend fun loadState(page: Int)
-}
-
-abstract class PagingDataSource<T>: PagingSource {
+abstract class PagingDataSource<T> {
     private val mutableList: MutableList<T> = mutableListOf()
     private val mutableLiveData: MutableLiveData<PagingData<T>> = MutableLiveData()
     internal var endPage = false
@@ -19,7 +15,7 @@ abstract class PagingDataSource<T>: PagingSource {
     internal var currentPage = 1
     internal var currentThrowable: Throwable? = null
 
-    override suspend fun loadState(page: Int) {
+    internal suspend fun loadState(page: Int) {
         currentPage = page
         onLoadState(page)
     }
@@ -30,7 +26,7 @@ abstract class PagingDataSource<T>: PagingSource {
         endPage = false
         hasError = false
         currentThrowable = null
-        mutableList.clear()
+        //mutableList.clear()
         mutableList.addAll(items)
         mutableLiveData.postValue(mutableList.toPagingData())
     }

@@ -9,6 +9,7 @@ import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.core.view.isVisible
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.utsman.paging.data.LoadState
 import com.utsman.paging.data.LoadStatus
@@ -16,15 +17,15 @@ import com.utsman.paging.adapter.PainlessPagedAdapter
 
 fun logi(msg: String) = Log.i("LOGGING", msg)
 
-data class SampleItem(
+data class SampleUser(
     var id: String = "",
     var name: String = ""
 )
 
 class SampleViewHolder(view: View) : RecyclerView.ViewHolder(view) {
     @SuppressLint("SetTextI18n")
-    fun bind(item: SampleItem, position: Int) = itemView.run {
-        findViewById<TextView>(R.id.txt_item).text = "$position - ${item.name}"
+    fun bind(user: SampleUser, position: Int) = itemView.run {
+        findViewById<TextView>(R.id.txt_item).text = "$position - ${user.name}"
     }
 }
 
@@ -53,10 +54,21 @@ class StateViewHolder(view: View) : RecyclerView.ViewHolder(view) {
     }
 }
 
-class SampleAdapter : PainlessPagedAdapter<SampleItem, SampleViewHolder>() {
+val sampleDiffCallback = object : DiffUtil.ItemCallback<SampleUser>() {
+    override fun areItemsTheSame(oldItem: SampleUser, newItem: SampleUser): Boolean {
+        return oldItem.id == newItem.id
+    }
+
+    override fun areContentsTheSame(oldItem: SampleUser, newItem: SampleUser): Boolean {
+        return oldItem == newItem
+    }
+
+}
+
+class SampleAdapter : PainlessPagedAdapter<SampleUser, SampleViewHolder>() {
     override fun onCreatePageViewHolder(parent: ViewGroup, viewType: Int): SampleViewHolder {
         return SampleViewHolder(
-                LayoutInflater.from(parent.context).inflate(R.layout.item_view, parent, false)
+            LayoutInflater.from(parent.context).inflate(R.layout.item_view, parent, false)
         )
     }
 

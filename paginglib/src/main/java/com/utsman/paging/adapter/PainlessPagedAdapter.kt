@@ -50,12 +50,21 @@ abstract class PainlessPagedAdapter<T, VH : RecyclerView.ViewHolder>(
                 }
 
                 diffResult = DiffUtil.calculateDiff(diffUtil!!)
+                mutableItemList.clear()
                 mutableItemList.addAll(newPagingData.items)
-                diffResult!!.dispatchUpdatesTo(this@PainlessPagedAdapter)
                 submitLoadState(LoadState.Success)
+                diffResult!!.dispatchUpdatesTo(this@PainlessPagedAdapter)
             } else {
                 submitLoadState(LoadState.error(newPagingData.throwable?.message))
             }
+        }
+    }
+
+    private fun calculateDiff(operation: () -> Unit) {
+        if (diffUtil != null) {
+            diffResult = DiffUtil.calculateDiff(diffUtil!!)
+            operation.invoke()
+            diffResult!!.dispatchUpdatesTo(this@PainlessPagedAdapter)
         }
     }
 
@@ -156,12 +165,20 @@ abstract class PainlessPagedAdapter<T, VH : RecyclerView.ViewHolder>(
         MainScope().launch {
             if (hadExtraRow != hasExtraRow) {
                 if (hadExtraRow) {
-                    notifyItemRemoved(itemCount)
+                    calculateDiff {
+                        notifyItemRemoved(itemCount)
+                    }
                 } else {
-                    notifyItemInserted(itemCount)
+                    //notifyItemInserted(itemCount)
+                    calculateDiff {
+                        notifyItemInserted(itemCount)
+                    }
                 }
             } else if (hasExtraRow && previousState != loadState) {
-                notifyItemChanged(itemCount - 1)
+                //notifyItemChanged(itemCount - 1)
+                calculateDiff {
+                    notifyItemChanged(itemCount - 1)
+                }
             }
         }
     }
@@ -197,8 +214,9 @@ abstract class PainlessPagedAdapter<T, VH : RecyclerView.ViewHolder>(
     }
 
     fun refresh() {
-        mutableItemList.clear()
-        notifyDataSetChanged()
+        calculateDiff {
+            mutableItemList.clear()
+        }
         if (pagingDataSource != null) {
             GlobalScope.launch {
                 pagingDataSource!!.onLoadState(1)

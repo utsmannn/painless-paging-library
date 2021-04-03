@@ -1,5 +1,6 @@
 package com.utsman.paging.extensions
 
+import android.annotation.SuppressLint
 import android.util.Log
 import androidx.recyclerview.widget.DiffUtil
 import com.utsman.paging.data.PagingData
@@ -21,4 +22,17 @@ internal fun <T>Throwable.toPagingData(): PagingData<T> {
         items = emptyList(),
         throwable = this
     )
+}
+
+internal fun <T>createDefaultItemCallback(): DiffUtil.ItemCallback<T> {
+    return object : DiffUtil.ItemCallback<T>() {
+        override fun areItemsTheSame(oldItem: T, newItem: T): Boolean {
+            return oldItem == newItem
+        }
+
+        @SuppressLint("DiffUtilEquals")
+        override fun areContentsTheSame(oldItem: T, newItem: T): Boolean {
+            return oldItem == newItem
+        }
+    }
 }
