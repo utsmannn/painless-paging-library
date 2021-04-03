@@ -2,9 +2,14 @@ package com.utsman.paging.datasource
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.utsman.paging.data.LoadState
+import com.utsman.paging.data.LoadStatus
 import com.utsman.paging.data.PagingData
+import com.utsman.paging.data.PagingResult
+import com.utsman.paging.extensions.logi
 import com.utsman.paging.extensions.toPagingData
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 
 abstract class PagingDataSource<T> {
@@ -16,34 +21,36 @@ abstract class PagingDataSource<T> {
     internal var currentThrowable: Throwable? = null
 
     init {
-        GlobalScope.launch {
+        MainScope().launch {
             loadState(1)
         }
     }
 
     internal suspend fun loadState(page: Int) {
         currentPage = page
-        onLoadState(page)
+        when (val state = onLoadState(page)) {
+            is PagingResult.Success -> currentThrowable = null
+            is PagingResult.Error -> {
+                currentThrowable = state.throwable
+                hasError = true
+                mutableLiveData.postValue(state.throwable?.toPagingData(this@PagingDataSource))
+            }
+        }
     }
 
-    abstract suspend fun onLoadState(page: Int)
+    abstract suspend fun onLoadState(page: Int): PagingResult
 
     fun setCallbackItems(items: List<T>) = GlobalScope.launch {
-        endPage = false
-        hasError = false
-        currentThrowable = null
-        mutableList.addAll(items)
-        mutableLiveData.postValue(mutableList.toPagingData(this@PagingDataSource))
-    }
-
-    fun setCallbackError(throwable: Throwable) = GlobalScope.launch {
-        hasError = true
-        currentThrowable = throwable
-        mutableLiveData.postValue(throwable.toPagingData(this@PagingDataSource))
-    }
-
-    fun endPage() {
-        endPage = true
+        logi("page -> $currentPage | item source --> $items")
+        if (items.isEmpty()) {
+            endPage = true
+        } else {
+            endPage = false
+            hasError = false
+            currentThrowable = null
+            mutableList.addAll(items)
+            mutableLiveData.postValue(mutableList.toPagingData(this@PagingDataSource))
+        }
     }
 
     fun currentPageLiveData(): LiveData<PagingData<T>> {

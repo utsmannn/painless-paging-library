@@ -7,6 +7,7 @@ import com.utsman.paging.data.LoadState
 import com.utsman.paging.data.LoadStatus
 import com.utsman.paging.data.PagingData
 import com.utsman.paging.datasource.PagingDataSource
+import com.utsman.paging.extensions.logi
 import com.utsman.paging.listener.EndlessScrollListener
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.MainScope
@@ -27,7 +28,6 @@ abstract class PainlessPagedAdapter<T, VH : RecyclerView.ViewHolder>(
     private var viewGroup: ViewGroup? = null
     private var stateHolder: RecyclerView.ViewHolder? = null
     private val loadStateType = 99
-    //private var pagingDataSource: PagingDataSource<T>? = null
     private val dataSourceState: MutableStateFlow<PagingDataSource<T>?> = MutableStateFlow(null)
     private var delayPerPage: Long = 1000
 
@@ -42,6 +42,7 @@ abstract class PainlessPagedAdapter<T, VH : RecyclerView.ViewHolder>(
     }
 
     fun submitData(newPagingData: PagingData<T>) = GlobalScope.launch {
+        logi("submitting.... -> $newPagingData")
         submitLoadState(LoadState.Running)
         if (dataSourceState.value == null) {
             dataSourceState.value = newPagingData.dataSource
@@ -169,7 +170,7 @@ abstract class PainlessPagedAdapter<T, VH : RecyclerView.ViewHolder>(
         MainScope().launch {
             if (hadExtraRow != hasExtraRow) {
                 if (hadExtraRow) {
-                    notifyItemRemoved(itemCount - 1)
+                    notifyItemRemoved(itemCount)
                 } else {
                     notifyItemInserted(itemCount)
                 }
@@ -188,17 +189,22 @@ abstract class PainlessPagedAdapter<T, VH : RecyclerView.ViewHolder>(
                 if (pagingDataSource != null && layoutManager != null) {
                     recyclerView.addOnScrollListener(object : EndlessScrollListener(layoutManager) {
                         override fun onLoadMore(page: Int, totalItemsCount: Int, view: RecyclerView) {
-                            when {
-                                pagingDataSource.endPage -> {
-                                    submitLoadState(LoadState.End)
-                                }
-                                pagingDataSource.hasError -> {
-                                    submitLoadState(LoadState.Failed(pagingDataSource.currentThrowable))
-                                }
-                                else -> {
-                                    submitLoadState(LoadState.Running)
-                                    MainScope().launch {
-                                        pagingDataSource.loadState(page + 1)
+                            logi("on page --> ${pagingDataSource.currentPage} -> end -> ${pagingDataSource.endPage}")
+
+                            GlobalScope.launch {
+                                delay(20)
+                                when {
+                                    pagingDataSource.endPage -> {
+                                        submitLoadState(LoadState.End)
+                                    }
+                                    pagingDataSource.hasError -> {
+                                        submitLoadState(LoadState.Failed(pagingDataSource.currentThrowable))
+                                    }
+                                    else -> {
+                                        submitLoadState(LoadState.Running)
+                                        MainScope().launch {
+                                            pagingDataSource.loadState(page + 1)
+                                        }
                                     }
                                 }
                             }
