@@ -40,9 +40,8 @@ abstract class PagingDataSource<T> {
 
     abstract suspend fun onLoadState(page: Int): PagingResult
 
-    fun setCallbackItems(items: List<T>) = GlobalScope.launch {
-        logi("page -> $currentPage | item source --> $items")
-        if (items.isEmpty()) {
+    fun setCallbackItems(items: List<T>?) = GlobalScope.launch {
+        if (items.isNullOrEmpty()) {
             endPage = true
         } else {
             endPage = false

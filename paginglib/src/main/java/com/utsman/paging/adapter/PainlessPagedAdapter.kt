@@ -42,7 +42,6 @@ abstract class PainlessPagedAdapter<T, VH : RecyclerView.ViewHolder>(
     }
 
     fun submitData(newPagingData: PagingData<T>) = GlobalScope.launch {
-        logi("submitting.... -> $newPagingData")
         submitLoadState(LoadState.Running)
         if (dataSourceState.value == null) {
             dataSourceState.value = newPagingData.dataSource
@@ -189,10 +188,9 @@ abstract class PainlessPagedAdapter<T, VH : RecyclerView.ViewHolder>(
                 if (pagingDataSource != null && layoutManager != null) {
                     recyclerView.addOnScrollListener(object : EndlessScrollListener(layoutManager) {
                         override fun onLoadMore(page: Int, totalItemsCount: Int, view: RecyclerView) {
-                            logi("on page --> ${pagingDataSource.currentPage} -> end -> ${pagingDataSource.endPage}")
 
                             GlobalScope.launch {
-                                delay(20)
+                                delay(80)
                                 when {
                                     pagingDataSource.endPage -> {
                                         submitLoadState(LoadState.End)

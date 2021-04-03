@@ -54,17 +54,6 @@ class StateViewHolder(view: View) : RecyclerView.ViewHolder(view) {
     }
 }
 
-val sampleDiffCallback = object : DiffUtil.ItemCallback<SampleUser>() {
-    override fun areItemsTheSame(oldItem: SampleUser, newItem: SampleUser): Boolean {
-        return oldItem.id == newItem.id
-    }
-
-    override fun areContentsTheSame(oldItem: SampleUser, newItem: SampleUser): Boolean {
-        return oldItem == newItem
-    }
-
-}
-
 class SampleAdapter : PainlessPagedAdapter<SampleUser, SampleViewHolder>() {
     override fun onCreatePageViewHolder(parent: ViewGroup, viewType: Int): SampleViewHolder {
         return SampleViewHolder(
