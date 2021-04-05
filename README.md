@@ -17,7 +17,7 @@
 
 ## Download
 ### Step 1 - Add the JitPack repository to your build file
-```
+```groovy
 allprojects {
     repositories {
         ...
@@ -27,9 +27,9 @@ allprojects {
 ```
 
 ### Step 2 - Add the dependency
-```
+```groovy
 dependencies {
-        implementation 'com.github.utsmannn:painless-paging-library:1.0.0'
+     implementation 'com.github.utsmannn:painless-paging-library:1.0.0'
 }
 ```
 
