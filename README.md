@@ -146,14 +146,14 @@ class StateViewHolder(view: View) : RecyclerView.ViewHolder(view) {
 
 ### Attach state view holder in adapter
 ```kotlin
-sampleAdapter.attachStateViewHolder { parent  ->
+userAdapter.attachStateViewHolder { parent  ->
     val view = LayoutInflater.from(parent.context).inflate(R.layout.state_view, parent, false)
     StateViewHolder(view)
 }
 
-sampleAdapter.onBindLoadStateViewHolder<StateViewHolder> { holder, loadState ->
+userAdapter.onBindLoadStateViewHolder<StateViewHolder> { holder, loadState ->
     holder.bind(loadState) {
-        sampleAdapter.retry()
+        userAdapter.retry()
     }
 }
 ```
