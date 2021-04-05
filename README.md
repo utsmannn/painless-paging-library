@@ -12,7 +12,7 @@
   <a href="https://github.com/utsmannn/painless-paging-library/pulls"><img alt="Pull request" src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat"></a>
   <a href="https://twitter.com/utsmannn"><img alt="Twitter" src="https://img.shields.io/twitter/follow/utsmannn"></a>
   <a href="https://github.com/utsmannn"><img alt="Github" src="https://img.shields.io/github/followers/utsmannn?label=follow&style=social"></a>
-  <p align="center">Android Paging Library with painless implementation. <br>Build for modern architecture with Kotlin and Coroutine</p>
+  <p align="center">Android Paging Library with painless implementation<br>Build for modern architecture with Kotlin and Coroutine</p>
 </p>
 
 ## Download

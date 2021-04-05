@@ -18,7 +18,7 @@ import com.utsman.paging.extensions.createSimpleAdapter
 
 class MainActivity : AppCompatActivity() {
 
-    //private val sampleAdapter = SampleAdapter()
+    private val sampleAdapter = SampleAdapter()
     private val viewModel: SampleViewModel by viewModels()
 
     @SuppressLint("SetTextI18n")
@@ -27,19 +27,19 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         val recyclerView = findViewById<RecyclerView>(R.id.recycler_view)
-        val sampleAdapter = recyclerView.createSimpleAdapter<SampleUser>(R.layout.item_view) {
+        /*val sampleAdapter = recyclerView.createSimpleAdapter<SampleUser>(R.layout.item_view) {
             layoutManager = GridLayoutManager(this@MainActivity, 2)
             onBindViewHolder = { v, item, p ->
                 v.run {
                     findViewById<TextView>(R.id.txt_item).text = "$p - ${item.name}"
                 }
             }
-        }
+        }*/
 
-        /*recyclerView.run {
+        recyclerView.run {
             layoutManager = LinearLayoutManager(this@MainActivity)
             adapter = sampleAdapter
-        }*/
+        }
 
         sampleAdapter.attachStateViewHolder { parent  ->
             val view = LayoutInflater.from(parent.context).inflate(R.layout.state_view, parent, false)
