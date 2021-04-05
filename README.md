@@ -34,8 +34,69 @@ dependencies {
 ```
 
 ## Implementation
-`reserved`
+### Create Adapter
+The adapter extend to `PainlessPagedAdapter`
+```kotlin
 
+// standart view holder
+class UserViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+    fun bind(item: User, position: Int) = itemView.run {
+        findViewById<TextView>(R.id.txt_item).text = "$position - ${item.name}"
+    }
+}
+
+// adapter with PainlessPagedAdapter
+class UserAdapter : PainlessPagedAdapter<User, UserViewHolder>() {
+    override fun onCreatePageViewHolder(parent: ViewGroup, viewType: Int): UserViewHolder {
+        return UserViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_view, parent, false))
+    }
+
+    override fun onBindPageViewHolder(holder: UserViewHolder, position: Int) {
+        getItem(position)?.let {
+            holder.bind(it, position)
+        }
+    }
+
+}
+```
+
+### Create data source
+Create class with extend to `PagingDataSource`
+
+```kotlin
+class UserDataSource : PagingDataSource<User>() {
+    private val userRepository: UserRepository = UserRepository.Companion.Impl()
+
+    override suspend fun onLoadState(page: Int): PagingResult {
+        return try {
+            val response = userRepository.getUsers(page)
+            val items = response.data
+            PagingResult.Success(items ?: emptyList())
+        } catch (e: Throwable) {
+            PagingResult.Error(e)
+        }
+    }
+}
+```
+
+### Add in ViewModel
+The data source will be extracting result item with `PagingData` class and wrapping with `liveData`, implement it on `ViewModel`.
+
+```kotlin
+class UserViewModel : ViewModel() {
+
+    private val userDataSource = UserDataSource()
+    val pageData: LiveData<PagingData<User>>
+            get() = userDataSource.currentPageLiveData()
+}
+```
+
+### Submitting item on adapter
+```kotlin
+viewModel.pageData.observe(this) { pagingData ->
+    userAdapter.submitData(pagingData)
+}
+```
 
 ## License
 ```
