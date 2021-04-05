@@ -38,7 +38,7 @@ dependencies {
 The adapter extend to `PainlessPagedAdapter`
 ```kotlin
 
-// standart view holder
+// standard view holder
 class UserViewHolder(view: View) : RecyclerView.ViewHolder(view) {
     fun bind(item: User, position: Int) = itemView.run {
         findViewById<TextView>(R.id.txt_item).text = "$position - ${item.name}"
@@ -95,6 +95,66 @@ class UserViewModel : ViewModel() {
 ```kotlin
 viewModel.pageData.observe(this) { pagingData ->
     userAdapter.submitData(pagingData)
+}
+```
+
+## Extensions
+This library can generate adapter with simple extensions code. **Not recommended for multiple view type adapter**.
+
+```kotlin
+val userAdapter = recyclerView.createSimpleAdapter<User>(R.layout.item_view) {
+    layoutManager = LinearLayoutManager(this@MainActivity)
+    onBindViewHolder = { itemView, item, position ->
+        itemView.run {
+            findViewById<TextView>(R.id.txt_item).text = "$position - ${item.name}"
+        }
+    }
+}
+```
+
+## Add State changes UI
+You can add the loading view in footer, state of data changes.
+
+### Create a standard view holder
+Place all view when data change to loading and error
+
+```kotlin
+class StateViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+
+    fun bind(loadState: LoadState, retry: () -> Unit) = itemView.run {
+        findViewById<ProgressBar>(R.id.progress_bar).run {
+            isVisible = loadState.loadStatus == LoadStatus.RUNNING
+        }
+
+        findViewById<TextView>(R.id.txt_error).run {
+            isVisible = loadState.loadStatus == LoadStatus.FAILED
+
+            if (loadState.loadStatus == LoadStatus.FAILED) {
+                text = (loadState as LoadState.Failed).throwable?.message
+            }
+        }
+
+        findViewById<Button>(R.id.btn_retry).run {
+            isVisible = loadState.loadStatus == LoadStatus.FAILED
+            setOnClickListener {
+                retry.invoke()
+            }
+        }
+    }
+}
+```
+
+### Attach state view holder in adapter
+```kotlin
+sampleAdapter.attachStateViewHolder { parent  ->
+    val view = LayoutInflater.from(parent.context).inflate(R.layout.state_view, parent, false)
+    StateViewHolder(view)
+}
+
+sampleAdapter.onBindLoadStateViewHolder<StateViewHolder> { holder, loadState ->
+    holder.bind(loadState) {
+        sampleAdapter.retry()
+    }
 }
 ```
 

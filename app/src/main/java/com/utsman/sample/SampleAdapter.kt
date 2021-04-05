@@ -49,8 +49,6 @@ class EvenViewHolder(view: View) : RecyclerView.ViewHolder(view) {
 
 class StateViewHolder(view: View) : RecyclerView.ViewHolder(view) {
     fun bind(loadState: LoadState, retry: () -> Unit) = itemView.run {
-        logi("state in holder is --> ${loadState.loadStatus}")
-        logi("bind success.......")
         findViewById<ProgressBar>(R.id.progress_bar).run {
             isVisible = loadState.loadStatus == LoadStatus.RUNNING
         }
