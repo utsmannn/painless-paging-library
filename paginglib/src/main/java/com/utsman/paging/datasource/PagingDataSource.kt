@@ -29,7 +29,10 @@ abstract class PagingDataSource<T> {
     internal suspend fun loadState(page: Int) {
         currentPage = page
         when (val state = onLoadState(page)) {
-            is PagingResult.Success -> currentThrowable = null
+            is PagingResult.Success<*> -> {
+                val items = state.items as List<T>?
+                setCallbackItems(items)
+            }
             is PagingResult.Error -> {
                 currentThrowable = state.throwable
                 hasError = true
@@ -40,7 +43,7 @@ abstract class PagingDataSource<T> {
 
     abstract suspend fun onLoadState(page: Int): PagingResult
 
-    fun setCallbackItems(items: List<T>?) = GlobalScope.launch {
+    private fun setCallbackItems(items: List<T>?) = GlobalScope.launch {
         if (items.isNullOrEmpty()) {
             endPage = true
         } else {

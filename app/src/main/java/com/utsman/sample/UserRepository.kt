@@ -18,7 +18,7 @@ interface UserRepository {
             const val get = "/name"
 
             private val loggingInterceptor = HttpLoggingInterceptor().apply {
-                level = HttpLoggingInterceptor.Level.BODY
+                level = HttpLoggingInterceptor.Level.BASIC
             }
 
             private fun provideOkHttp() = OkHttpClient.Builder()

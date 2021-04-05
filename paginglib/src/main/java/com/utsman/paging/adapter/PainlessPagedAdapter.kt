@@ -2,18 +2,18 @@ package com.utsman.paging.adapter
 
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.utsman.paging.data.LoadState
 import com.utsman.paging.data.LoadStatus
 import com.utsman.paging.data.PagingData
 import com.utsman.paging.datasource.PagingDataSource
-import com.utsman.paging.extensions.logi
-import com.utsman.paging.listener.EndlessScrollListener
+import com.utsman.paging.extensions.whenScrollEnd
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 abstract class PainlessPagedAdapter<T, VH : RecyclerView.ViewHolder>(
@@ -73,7 +73,7 @@ abstract class PainlessPagedAdapter<T, VH : RecyclerView.ViewHolder>(
     }
 
     fun getItem(position: Int): T? {
-        return if (getItemViewType(position) == loadStateType) {
+        return if (getItemViewTypeShadow(position) == loadStateType) {
             null
         } else {
             itemList[position]
@@ -160,6 +160,14 @@ abstract class PainlessPagedAdapter<T, VH : RecyclerView.ViewHolder>(
         }
     }
 
+    fun getItemViewTypeShadow(position: Int): Int {
+        return if (hasExtraRow() && position == itemCount - 1 && stateHolder != null) {
+            loadStateType
+        } else {
+            0
+        }
+    }
+
     private fun submitLoadState(newLoadState: LoadState) {
         loadStateFlow.value = newLoadState
         val previousState = this.loadState
@@ -182,32 +190,34 @@ abstract class PainlessPagedAdapter<T, VH : RecyclerView.ViewHolder>(
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)
         val layoutManager = recyclerView.layoutManager
+
+        when (layoutManager) {
+            is GridLayoutManager -> {
+                val span = layoutManager.spanCount
+                layoutManager.spanSizeLookup = setGridSpan(span)
+            }
+        }
+
         submitLoadState(LoadState.Running)
         GlobalScope.launch {
             dataSourceState.collect { pagingDataSource ->
                 if (pagingDataSource != null && layoutManager != null) {
-                    recyclerView.addOnScrollListener(object : EndlessScrollListener(layoutManager) {
-                        override fun onLoadMore(page: Int, totalItemsCount: Int, view: RecyclerView) {
-
-                            GlobalScope.launch {
-                                delay(80)
-                                when {
-                                    pagingDataSource.endPage -> {
-                                        submitLoadState(LoadState.End)
-                                    }
-                                    pagingDataSource.hasError -> {
-                                        submitLoadState(LoadState.Failed(pagingDataSource.currentThrowable))
-                                    }
-                                    else -> {
-                                        submitLoadState(LoadState.Running)
-                                        MainScope().launch {
-                                            pagingDataSource.loadState(page + 1)
-                                        }
-                                    }
+                    recyclerView.whenScrollEnd(layoutManager)
+                        .onEach {
+                            submitLoadState(LoadState.Running)
+                            when {
+                                pagingDataSource.endPage -> {
+                                    submitLoadState(LoadState.End)
+                                }
+                                pagingDataSource.hasError -> {
+                                    submitLoadState(LoadState.Failed(pagingDataSource.currentThrowable))
+                                }
+                                else -> {
+                                    pagingDataSource.loadState(it)
                                 }
                             }
                         }
-                    })
+                        .launchIn(MainScope())
                 }
             }
         }
@@ -219,7 +229,7 @@ abstract class PainlessPagedAdapter<T, VH : RecyclerView.ViewHolder>(
         }
         if (dataSourceState.value != null) {
             GlobalScope.launch {
-                dataSourceState.value!!.onLoadState(1)
+                dataSourceState.value!!.loadState(1)
             }
         }
     }
@@ -228,7 +238,16 @@ abstract class PainlessPagedAdapter<T, VH : RecyclerView.ViewHolder>(
         if (dataSourceState.value != null) {
             GlobalScope.launch {
                 submitLoadState(LoadState.Running)
-                dataSourceState.value!!.onLoadState(dataSourceState.value!!.currentPage)
+                dataSourceState.value!!.loadState(dataSourceState.value!!.currentPage)
+            }
+        }
+    }
+
+    private fun setGridSpan(column: Int) = object : GridLayoutManager.SpanSizeLookup() {
+        override fun getSpanSize(position: Int): Int {
+            return when (getItemViewType(position)) {
+                loadStateType -> column
+                else -> 1
             }
         }
     }

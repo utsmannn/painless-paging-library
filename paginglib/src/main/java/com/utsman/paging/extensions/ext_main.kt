@@ -1,26 +1,46 @@
 package com.utsman.paging.extensions
 
-import android.util.Log
-import com.utsman.paging.data.PagingData
-import com.utsman.paging.datasource.PagingDataSource
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.utsman.paging.adapter.PainlessPagedAdapter
 
-internal fun logi(msg: String) = Log.i("PAGING", msg)
+data class GenerateSimpleAdapter<T>(
+    var layoutManager: RecyclerView.LayoutManager,
+    var onBindViewHolder: ((itemView: View, item: T, position: Int) -> Unit)? = null
+)
 
-internal fun <T>List<T>.toPagingData(dataSource: PagingDataSource<T>): PagingData<T> {
-    return PagingData(
-        items = this,
-        dataSource = dataSource
-    )
+class SimpleViewHolder<T>(view: View) : RecyclerView.ViewHolder(view) {
+    fun bind(item: T, position: Int, viewHolder: View.(T, Int) -> Unit) = itemView.run {
+        viewHolder.invoke(this, item, position)
+    }
 }
 
-fun <T>PagingData<T>.toList(): List<T> {
-    return items
+class SimpleAdapter<T>(private val layoutRes: Int, private val onBind: ((View, T, Int) -> Unit)?) :
+    PainlessPagedAdapter<T, SimpleViewHolder<T>>() {
+
+    override fun onCreatePageViewHolder(parent: ViewGroup, viewType: Int): SimpleViewHolder<T> {
+        val view = LayoutInflater.from(parent.context).inflate(layoutRes, parent, false)
+        return SimpleViewHolder(view)
+    }
+
+    override fun onBindPageViewHolder(holder: SimpleViewHolder<T>, position: Int) {
+        getItem(position)?.let {
+            holder.bind(it, position) { _, pos ->
+                onBind?.invoke(this, it, pos)
+            }
+        }
+    }
 }
 
-internal fun <T>Throwable.toPagingData(dataSource: PagingDataSource<T>): PagingData<T> {
-    return PagingData(
-        items = emptyList(),
-        throwable = this,
-        dataSource = dataSource
-    )
+fun <T> RecyclerView.createSimpleAdapter(layoutRes: Int, onGenerateSimpleAdapter: GenerateSimpleAdapter<T>.() -> Unit): SimpleAdapter<T> {
+    val layoutManagerExist = layoutManager ?: LinearLayoutManager(context)
+    val generate = GenerateSimpleAdapter<T>(layoutManagerExist).apply(onGenerateSimpleAdapter)
+    val onBind = generate.onBindViewHolder
+    return SimpleAdapter(layoutRes, onBind).apply {
+        layoutManager = generate.layoutManager
+        adapter = this
+    }
 }

@@ -1,6 +1,7 @@
 package com.utsman.sample
 
 import com.google.gson.annotations.SerializedName
+import java.util.*
 
 data class User(
     val success: Boolean,
@@ -14,9 +15,12 @@ data class User(
     ) {
 
         fun toSampleUser(): SampleUser {
+            val lengthType = name.length
+            val type = (0..1).random()
             return SampleUser(
                 id = id,
-                name = name
+                name = name,
+                type = UserType.values()[type]
             )
         }
     }
