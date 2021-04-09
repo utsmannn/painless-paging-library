@@ -69,6 +69,9 @@ abstract class PainlessPagedAdapter<T, VH : RecyclerView.ViewHolder>(
             diffResult = DiffUtil.calculateDiff(diffUtil!!)
             operation.invoke()
             diffResult!!.dispatchUpdatesTo(this@PainlessPagedAdapter)
+        } else {
+            operation.invoke()
+            notifyDataSetChanged()
         }
     }
 
@@ -240,6 +243,12 @@ abstract class PainlessPagedAdapter<T, VH : RecyclerView.ViewHolder>(
                 submitLoadState(LoadState.Running)
                 dataSourceState.value!!.loadState(dataSourceState.value!!.currentPage)
             }
+        }
+    }
+
+    fun clearItems() {
+        calculateDiff {
+            mutableItemList.clear()
         }
     }
 
