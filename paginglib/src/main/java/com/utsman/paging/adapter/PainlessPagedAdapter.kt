@@ -249,8 +249,12 @@ abstract class PainlessPagedAdapter<T, VH : RecyclerView.ViewHolder>(
 
     fun clearItems() {
         calculateDiff {
-            dataSourceState.value!!.mutableList.clear()
-            mutableItemList.clear()
+            if (dataSourceState.value != null && mutableItemList.isNotEmpty()) {
+                if (dataSourceState.value!!.mutableList.isNotEmpty()) {
+                    dataSourceState.value!!.mutableList.clear()
+                    mutableItemList.clear()
+                }
+            }
         }
     }
 

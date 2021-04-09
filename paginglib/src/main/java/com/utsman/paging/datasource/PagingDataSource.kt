@@ -64,7 +64,9 @@ abstract class PagingDataSource<T> {
     }
 
     suspend fun invalidate() {
-        mutableList.clear()
-        loadState(1)
+        if (mutableList.isNotEmpty()) {
+            mutableList.clear()
+            loadState(1)
+        }
     }
 }
