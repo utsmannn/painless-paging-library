@@ -232,6 +232,7 @@ abstract class PainlessPagedAdapter<T, VH : RecyclerView.ViewHolder>(
         }
         if (dataSourceState.value != null) {
             GlobalScope.launch {
+                dataSourceState.value!!.mutableList.clear()
                 dataSourceState.value!!.loadState(1)
             }
         }
@@ -248,6 +249,7 @@ abstract class PainlessPagedAdapter<T, VH : RecyclerView.ViewHolder>(
 
     fun clearItems() {
         calculateDiff {
+            dataSourceState.value!!.mutableList.clear()
             mutableItemList.clear()
         }
     }

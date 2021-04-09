@@ -13,7 +13,7 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 
 abstract class PagingDataSource<T> {
-    private val mutableList: MutableList<T> = mutableListOf()
+    internal val mutableList: MutableList<T> = mutableListOf()
     private val mutableLiveData: MutableLiveData<PagingData<T>> = MutableLiveData()
     internal var endPage = false
     internal var hasError = false
@@ -61,5 +61,10 @@ abstract class PagingDataSource<T> {
 
     fun currentPage(): PagingData<T>? {
         return mutableLiveData.value
+    }
+
+    suspend fun invalidate() {
+        mutableList.clear()
+        loadState(1)
     }
 }
