@@ -227,12 +227,11 @@ abstract class PainlessPagedAdapter<T, VH : RecyclerView.ViewHolder>(
     }
 
     fun refresh() {
-        calculateDiff {
-            mutableItemList.clear()
-        }
         if (dataSourceState.value != null) {
+            mutableItemList.clear()
+            dataSourceState.value!!.mutableList.clear()
+            notifyDataSetChanged()
             GlobalScope.launch {
-                dataSourceState.value!!.mutableList.clear()
                 dataSourceState.value!!.loadState(1)
             }
         }
@@ -248,12 +247,11 @@ abstract class PainlessPagedAdapter<T, VH : RecyclerView.ViewHolder>(
     }
 
     fun clearItems() {
-        calculateDiff {
-            if (dataSourceState.value != null && mutableItemList.isNotEmpty()) {
-                if (dataSourceState.value!!.mutableList.isNotEmpty()) {
-                    dataSourceState.value!!.mutableList.clear()
-                    mutableItemList.clear()
-                }
+        if (dataSourceState.value != null && mutableItemList.isNotEmpty()) {
+            if (dataSourceState.value!!.mutableList.isNotEmpty()) {
+                dataSourceState.value!!.mutableList.clear()
+                mutableItemList.clear()
+                notifyDataSetChanged()
             }
         }
     }

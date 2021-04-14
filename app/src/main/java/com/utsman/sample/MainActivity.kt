@@ -41,6 +41,12 @@ class MainActivity : AppCompatActivity() {
             adapter = sampleAdapter
         }
 
+        findViewById<Button>(R.id.btn_test).run {
+            setOnClickListener {
+                sampleAdapter.refresh()
+            }
+        }
+
         sampleAdapter.attachStateViewHolder { parent  ->
             val view = LayoutInflater.from(parent.context).inflate(R.layout.state_view, parent, false)
             StateViewHolder(view)
