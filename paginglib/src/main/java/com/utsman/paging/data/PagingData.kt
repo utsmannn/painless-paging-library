@@ -9,4 +9,10 @@ data class PagingData<T>(
     internal var items: List<T> = emptyList(),
     @JvmField
     internal var throwable: Throwable? = null
-)
+) {
+    companion object {
+        fun <T> fromList(list: List<T>): PagingData<T> {
+            return PagingData(items = list)
+        }
+    }
+}

@@ -253,6 +253,9 @@ abstract class PainlessPagedAdapter<T, VH : RecyclerView.ViewHolder>(
                 mutableItemList.clear()
                 notifyDataSetChanged()
             }
+        } else {
+            mutableItemList.clear()
+            notifyDataSetChanged()
         }
     }
 
