@@ -29,7 +29,7 @@ allprojects {
 ### Step 2 - Add the dependency
 ```groovy
 dependencies {
-     implementation('com.github.utsmannn:painless-paging-library:1.2.0') {
+     implementation('com.github.utsmannn:painless-paging-library:{latest_version}') {
         exclude group: 'com.google.android.material', module: 'material'
     }
 }    
